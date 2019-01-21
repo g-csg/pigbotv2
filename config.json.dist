@@ -1,0 +1,5 @@
+{
+  "DataSource": "Data Source=Pigbot.db",
+  "DiscordApiKey": "",
+  "WolframAlphaKey": ""
+}
