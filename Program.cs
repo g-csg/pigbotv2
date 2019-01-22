@@ -61,7 +61,7 @@ namespace PigBot
                 messageBuilder.Append(botCommand.GetType().FullName + Environment.NewLine);
             }
 
-            message.Channel.SendMessageAsync(messageBuilder.ToString());
+            await message.Channel.SendMessageAsync(messageBuilder.ToString());
         }
 
         private static async Task ClientOnConnected()

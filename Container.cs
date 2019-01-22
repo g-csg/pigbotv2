@@ -6,6 +6,7 @@ using PigBot.BotCommands;
 using PigBot.CommandHandler;
 using PigBot.Database;
 using PigBot.Etc;
+using PigBot.Etc.Images;
 
 namespace PigBot
 {
@@ -31,6 +32,7 @@ namespace PigBot
             
             // watchers
             serviceCollection.AddTransient<IFourchanWatcher, FourchanWatcher>();
+            serviceCollection.AddTransient<IImageDownloadService, ImageDownloadService>();
             
             var serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider;
