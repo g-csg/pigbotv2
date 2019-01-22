@@ -7,6 +7,7 @@ using PigBot.CommandHandler;
 using PigBot.Database;
 using PigBot.Etc;
 using PigBot.Etc.Images;
+using PigBot.Etc.WolframAlpha;
 
 namespace PigBot
 {
@@ -19,7 +20,7 @@ namespace PigBot
             
             serviceCollection.AddLogging();
             serviceCollection.AddSingleton<IConfiguration>(configuration);
-            
+
             // database
             serviceCollection.AddDbContext<PigbotDbContext>(options => options.UseSqlite(configuration["DataSource"]));
             
@@ -29,10 +30,12 @@ namespace PigBot
             
             // commands
             serviceCollection.AddTransient<IBotCommand, PostCommand>();
+            serviceCollection.AddTransient<IBotCommand, AnswerCommand>();
             
             // watchers
             serviceCollection.AddTransient<IFourchanWatcher, FourchanWatcher>();
             serviceCollection.AddTransient<IImageDownloadService, ImageDownloadService>();
+            serviceCollection.AddTransient<IWolframAlphaClient, WolframAlphaClient>();
             
             var serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider;

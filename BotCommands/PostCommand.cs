@@ -56,7 +56,7 @@ namespace PigBot.BotCommands
                 }
 
                 var fileStream = new FileStream(fileName, FileMode.Open);
-                var result = await message.Channel.SendFileAsync(
+                await message.Channel.SendFileAsync(
                     filename: fileName, 
                     stream: fileStream, 
                     embed: embedBuilder.Build());
