@@ -12,14 +12,15 @@ namespace PigBot.BotCommands
     {
         public bool CanExecute(SocketMessage message)
         {
-            return message.Content.Contains("https://s.click.aliexpress.com");
+            return message.Content.Contains("https://s.click.aliexpress.com") || 
+                   message.Content.Contains("https://m.aliexpress.com");
         }
 
         public async Task Execute(SocketMessage message)
         {
             var replaceMessage = message.Content;
             
-            var aliParser = new Regex(@"\b(?:https://s.click\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var aliParser = new Regex(@"\b(?:https://s\.click\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             foreach (Match match in aliParser.Matches(message.Content))
             {
                 try
@@ -33,6 +34,14 @@ namespace PigBot.BotCommands
                 {
                     Console.WriteLine("Could not replace: "+e.Message);
                 }
+            }
+            
+            var aliMobileParser = new Regex(@"\b(?:https://m\.aliexpress\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            foreach (Match match in aliMobileParser.Matches(message.Content))
+            {
+                Console.WriteLine(match.Value);
+                var cleanUrl = match.Value.Split("?").First();
+                replaceMessage = replaceMessage.Replace(match.Value, cleanUrl);
             }
 
             var embedBuilder = new EmbedBuilder();
