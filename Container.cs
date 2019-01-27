@@ -31,6 +31,7 @@ namespace PigBot
             // commands
             serviceCollection.AddTransient<IBotCommand, PostCommand>();
             serviceCollection.AddTransient<IBotCommand, AnswerCommand>();
+            serviceCollection.AddTransient<IBotCommand, ReplaceAliReflinkCommand>();
             
             // watchers
             serviceCollection.AddTransient<IFourchanWatcher, FourchanWatcher>();

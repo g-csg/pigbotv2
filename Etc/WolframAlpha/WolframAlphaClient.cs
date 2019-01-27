@@ -1,8 +1,6 @@
 using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using PigBot.Etc.WolframAlpha.DTO;
 
 namespace PigBot.Etc.WolframAlpha
 {
@@ -15,28 +13,18 @@ namespace PigBot.Etc.WolframAlpha
             this.configuration = configuration;
         }
 
-        public ApiResponse ApiCall(string query)
+        public string ApiCall(string query)
         {
             query = Uri.EscapeDataString(query);
             
             var callUrl =
-                $"https://api.wolframalpha.com/v2/query?input={query}&appid={configuration["WolframAlphaKey"]}&output=json";
+                $"https://api.wolframalpha.com/v1/result?i={query}&appid={configuration["WolframAlphaKey"]}&units=metric";
 
             var webClient = new HttpClient();
             var response = webClient.GetAsync(callUrl).GetAwaiter().GetResult();
             var content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            try
-            {
-                var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(content);
-                return apiResponse;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: ");
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.InnerException?.Message);
-            }
-            return new ApiResponse();
+
+            return content;
         }
     }
 }

@@ -4,7 +4,10 @@ using System.Reflection.Emit;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore.Internal;
+using PigBot.Etc;
 using PigBot.Etc.WolframAlpha;
+using Thread = System.Threading.Thread;
 
 namespace PigBot.BotCommands
 {
@@ -19,14 +22,14 @@ namespace PigBot.BotCommands
 
         public bool CanExecute(SocketMessage message)
         {
-            return message.Content.StartsWith("!!answer_test");
+            return message.Content.StartsWith("!answer");
         }
 
         public async Task Execute(SocketMessage message)
         {
-            var requestQuery = message.Content.Replace("!!answer_test", "");
+            var requestQuery = message.Content.Replace("!", "");
 
-            message.Channel.TriggerTypingAsync();
+            await message.Channel.TriggerTypingAsync();
             var result = wolframAlphaClient.ApiCall(requestQuery);
             if (result == null)
             {
@@ -34,32 +37,28 @@ namespace PigBot.BotCommands
                 return;
             }
 
-            var relevantPods = result.queryresult.pods.Take(2);
-            
-            foreach (var pod in relevantPods)
+            if (result.Contains("No short answer available") || result.Contains("Wolfram|Alpha did not understand your input"))
             {
-                if (pod.title == "Input interpretation")
-                {
-                    continue;
-                }
+                var errorBuilder = new EmbedBuilder();
+                errorBuilder.AddField(new EmbedFieldBuilder().WithName("Error")
+                    .WithValue("Your question could not be answered"));
+                errorBuilder.Color = Color.Red;
                 
-                var embedBuilder = new EmbedBuilder();
-                embedBuilder.Fields.Add(new EmbedFieldBuilder().WithName(pod.title).WithValue("Wolfram|Alpha Response"));
-                embedBuilder.WithImageUrl(pod.subpods.First(s => s.img != null).img.src);
+                var answer = await message.Channel.SendMessageAsync(embed: errorBuilder.Build());
 
-                Console.WriteLine("embed builder done");
-                try
-                {
-                    var embedMessage = embedBuilder.Build();
-                    await message.Channel.SendMessageAsync(embed: embedMessage);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.InnerException?.Message);
-                }
-                
+                new Thread(() => 
+                { 
+                    Thread.Sleep(TimeSpan.FromSeconds(5));
+                    message.DeleteAsync();
+                    answer.DeleteAsync();
+                }).Start();
+                return;
             }
+            
+            var embedBuilder = new EmbedBuilder();
+            embedBuilder.AddField(new EmbedFieldBuilder().WithName("Result").WithValue(result));
+
+            await message.Channel.SendMessageAsync(embed: embedBuilder.Build());
         }
     }
 }

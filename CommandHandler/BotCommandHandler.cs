@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -22,7 +23,17 @@ namespace PigBot.CommandHandler
             {
                 if (botCommand.CanExecute(message) && botPolicyGuard.ExecutionAllowed(botCommand, message))
                 {
-                    await botCommand.Execute(message);
+                    try
+                    {
+                        await botCommand.Execute(message);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                        Console.WriteLine($"Exception executing command: {botCommand.GetType().FullName}");
+                        Console.WriteLine(e.Message);
+                        Console.WriteLine(e.InnerException?.Message);
+                    }
                 }
             }
         }
