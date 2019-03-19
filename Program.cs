@@ -22,7 +22,7 @@ namespace PigBot
         private static async Task MainAsync()
         {
             var container = Container.CreateContainer();
-            var client = new DiscordSocketClient();
+            var client = container.GetService<DiscordSocketClient>();
 
             var commandHandler = container.GetService<IBotCommandHandler>();
             

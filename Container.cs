@@ -1,4 +1,5 @@
 using System.IO;
+using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,8 @@ namespace PigBot
         {
             var configuration = BuildConfig();
             var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddSingleton(new DiscordSocketClient());
             
             serviceCollection.AddLogging();
             serviceCollection.AddSingleton<IConfiguration>(configuration);

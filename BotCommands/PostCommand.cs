@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -15,11 +16,13 @@ namespace PigBot.BotCommands
     {
         private readonly PigbotDbContext dbContext;
         private readonly IImageDownloadService imageDownloadService;
+        private readonly DiscordSocketClient discordClient;
 
-        public PostCommand(PigbotDbContext dbContext, IImageDownloadService imageDownloadService)
+        public PostCommand(PigbotDbContext dbContext, IImageDownloadService imageDownloadService, DiscordSocketClient discordClient)
         {
             this.dbContext = dbContext;
             this.imageDownloadService = imageDownloadService;
+            this.discordClient = discordClient;
         }
 
         public bool CanExecute(SocketMessage message)
@@ -56,10 +59,16 @@ namespace PigBot.BotCommands
                 }
 
                 var fileStream = new FileStream(fileName, FileMode.Open);
-                await message.Channel.SendFileAsync(
-                    filename: fileName, 
-                    stream: fileStream, 
-                    embed: embedBuilder.Build());
+                var channel = discordClient
+                    .GetGuild(189466684938125312)
+                    .GetTextChannel(491172628917256192);
+
+                if (channel == null)
+                {
+                    Console.WriteLine("channel is null");
+                }
+                    
+                await channel.SendFileAsync(fileStream, fileName, "Post", false, embedBuilder.Build());
                 
                 fileStream.Dispose();
                 
