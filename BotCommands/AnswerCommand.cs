@@ -27,13 +27,20 @@ namespace PigBot.BotCommands
 
         public async Task Execute(SocketMessage message)
         {
-            var requestQuery = message.Content.Replace("!", "");
+            var requestQuery = message.Content.Replace("!answer ", "");
 
+            if (requestQuery == "what is the heaviest object in the universe")
+            {
+                var matthewResponse = new EmbedBuilder();
+                matthewResponse.AddField(new EmbedFieldBuilder().WithName("Result").WithValue("Matthew"));
+                return;
+            }
+            
             await message.Channel.TriggerTypingAsync();
             var result = wolframAlphaClient.ApiCall(requestQuery);
             if (result == null)
             {
-                await message.Channel.SendMessageAsync("No answer was found to this question");
+                await message.Channel.SendMessageAsync("Wolfram|Alpha seems to be down");
                 return;
             }
 
