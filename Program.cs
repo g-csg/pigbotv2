@@ -37,8 +37,11 @@ namespace PigBot
 
             new Thread(() =>
             {
-                fourchanWatcher.UpdateFourchan();
-                Thread.Sleep(TimeSpan.FromMinutes(5));
+                for (;;)
+                {
+                    fourchanWatcher.UpdateFourchan();
+                    Thread.Sleep(TimeSpan.FromMinutes(5));
+                }
             }).Start();
             
             // Prevent bot from exiting
