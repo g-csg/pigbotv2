@@ -33,6 +33,7 @@ namespace PigBot.BotCommands
             {
                 var matthewResponse = new EmbedBuilder();
                 matthewResponse.AddField(new EmbedFieldBuilder().WithName("Result").WithValue("Matthew"));
+                await message.Channel.SendMessageAsync(embed: matthewResponse.Build());
                 return;
             }
             
