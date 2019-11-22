@@ -27,6 +27,9 @@ namespace PigBot
             var commandHandler = container.GetService<IBotCommandHandler>();
             
             client.MessageReceived += commandHandler.OnMessage;
+	    client.UserJoined += async (s,e) => {
+		    // TODO
+	    }
             client.MessageReceived += ClientOnMessageReceived;
             client.Connected += ClientOnConnected;
             

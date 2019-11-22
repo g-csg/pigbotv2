@@ -25,15 +25,21 @@ namespace PigBot.BotCommands
             this.discordClient = discordClient;
         }
 
+        // ???
         public bool CanExecute(SocketMessage message)
         {
             var authorId = message.Author.Id;
             var adminUser = dbContext.AdminUsers.FirstOrDefault(a => a.UserId == authorId);
-            return message.Content.StartsWith("!post") && adminUser != null;
+            // adminUser seems to be related to some database idea that wasn't implemented
+            // see Database/Adminuser.cs
+            return message.Content.StartsWith("!post") == true;
         }
 
+
+        // Post the Fourchan post as a Discord Embed message
         public async Task Execute(SocketMessage message)
         {
+            // grab post from Fourchan
             var parts = message.Content.Split(" ");
             if (int.TryParse(parts.Last(), out var postId))
             {
@@ -43,44 +49,50 @@ namespace PigBot.BotCommands
                     await message.Channel.SendMessageAsync("Post not found");
                     return;
                 }
-                
-                var embedBuilder = new EmbedBuilder();
-                embedBuilder.Color = Color.Green;
-                embedBuilder.Fields.Add(new EmbedFieldBuilder().WithName("Post").WithValue(
-                    WebUtility.HtmlDecode(Regex.Replace(post.Content.Replace("<br>", "\n"), "<[^>]*(>|$)", string.Empty))));
-                
-                var fileName = "";
-                
-                if (!string.IsNullOrEmpty(post.FileUrl) && post.FileUrl != "0")
-                {
-                    var downloadUrl = $"https://i.4cdn.org/g/{post.FileUrl}";
-                    fileName = imageDownloadService.DownloadImage(downloadUrl);
-                    embedBuilder.WithImageUrl($"attachment://{fileName}");
-                }
 
-                var fileStream = new FileStream(fileName, FileMode.Open);
+                // setup text channel to post in 
                 var channel = discordClient
-                    .GetGuild(189466684938125312)
-                    .GetTextChannel(491172628917256192);
+                    .GetGuild(189466684938125312)	 // the csg Discord server
+                    .GetTextChannel(491172628917256192); // the channel #csg-reviews
 
                 if (channel == null)
                 {
-                    Console.WriteLine("channel is null");
+                    await message.Channel.SendMessageAsync("Text channel not found! Where do I post?");
+                    return;
                 }
-                    
-                await channel.SendFileAsync(fileStream, fileName, "Post", false, embedBuilder.Build());
-                
-                fileStream.Dispose();
-                
-                if (!string.IsNullOrEmpty(fileName))
+
+                // Build embed message
+                var embedBuilder = new EmbedBuilder();
+                embedBuilder.Color = Color.Green;
+                embedBuilder.Fields.Add(new EmbedFieldBuilder().WithName($"{postId}").WithValue(
+                          WebUtility.HtmlDecode(Regex.Replace(post.Content.Replace("<br>", "\n"), "<[^>]*(>|$)", string.Empty))));
+
+                // if there is an image with the Fourchan post, include it
+                if (!string.IsNullOrEmpty(post.FileUrl) && post.FileUrl != "0")
                 {
+                    var downloadUrl = $"https://i.4cdn.org/g/{post.FileUrl}";
+                    var fileName = imageDownloadService.DownloadImage(downloadUrl);
+                    var fileStream = new FileStream(fileName, FileMode.Open);
+                    embedBuilder.WithImageUrl($"attachment://{fileName}");
+                    
+                    // post message with picture
+                    await channel.SendFileAsync(fileStream, fileName, "", false, embedBuilder.Build());
+
+                    // clean up
+                    fileStream.Dispose();
                     imageDownloadService.DeleteImage(fileName);
+                }
+                // if there is no image, post the text
+                else
+                {
+                    await channel.SendMessageAsync("", false, embedBuilder.Build());
                 }
 
                 return;
             }
 
-            await message.Channel.SendMessageAsync("that's not a :b:ost");
+            await message.Channel.SendMessageAsync("that's not a post!");
+
         }
     }
 }
